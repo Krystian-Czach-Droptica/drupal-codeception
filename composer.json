@@ -1,5 +1,5 @@
 {
-    "name": "droptica/drupal-codeception",
+    "name": "krystian-czach-droptica/drupal-codeception",
     "description": "Codeception toolset for Drupal testing.",
     "type": "package",
     "repositories": [
