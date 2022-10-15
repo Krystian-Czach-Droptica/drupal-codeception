@@ -3,7 +3,6 @@
 namespace Codeception\Module;
 
 use Codeception\Module;
-use Codeception\TestInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\Entity\User;
@@ -38,21 +37,21 @@ class DrupalUser extends Module {
    *
    * @var WebDriver|PhpBrowser
    */
-  protected WebDriver|PhpBrowser $driver;
+  protected $driver;
 
   /**
    * A list of user ids created during test suite.
    *
    * @var array
    */
-  protected array $users;
+  protected $users;
 
   /**
    * Default module configuration.
    *
    * @var array
    */
-  protected array $config = [
+  protected $config = [
     'alias' => '',
     'default_role' => 'authenticated',
     'driver' => 'WebDriver',
@@ -67,6 +66,7 @@ class DrupalUser extends Module {
    * {@inheritdoc}
    */
   public function _beforeSuite($settings = []) { // @codingStandardsIgnoreLine
+    $this->driver = null;
     if (!$this->hasModule($this->_getConfig('driver'))) {
       $this->fail('User driver module not found.');
     }
@@ -77,7 +77,7 @@ class DrupalUser extends Module {
   /**
    * {@inheritdoc}
    */
-  public function _after(TestInterface $test) { // @codingStandardsIgnoreLine
+  public function _after(\Codeception\TestCase $test) { // @codingStandardsIgnoreLine
     if ($this->_getConfig('cleanup_test')) {
       $this->userCleanup();
     }
@@ -86,7 +86,7 @@ class DrupalUser extends Module {
   /**
    * {@inheritdoc}
    */
-  public function _failed(TestInterface $test, $fail) { // @codingStandardsIgnoreLine
+  public function _failed(\Codeception\TestCase $test, $fail) { // @codingStandardsIgnoreLine
     if ($this->_getConfig('cleanup_failed')) {
       $this->userCleanup();
     }

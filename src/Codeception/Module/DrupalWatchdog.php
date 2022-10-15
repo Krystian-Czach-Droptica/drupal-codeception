@@ -28,14 +28,14 @@ class DrupalWatchdog extends Module {
    *
    * @var array
    */
-  protected array $messages = [];
+  protected $messages = [];
 
   /**
    * Default module configuration.
    *
    * @var array
    */
-  protected array $config = [
+  protected $config = [
     'channels' => [],
     'level' => 'ERROR',
     'enabled' => TRUE,
@@ -46,7 +46,7 @@ class DrupalWatchdog extends Module {
    *
    * @var array
    */
-  protected array $logLevels = [
+  protected $logLevels = [
     'DEBUG' => 7,
     'INFO' => 6,
     'NOTICE' => 5,

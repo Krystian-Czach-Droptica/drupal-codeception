@@ -3,201 +3,98 @@
 namespace Codeception\Module;
 
 use Codeception\Module;
-use Codeception\TestInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Url;
-use Codeception\TestCase;
+use Codeception\Util\Drush;
 
 /**
- * Class DrupalEntity.
+ * Class DrupalDrush.
  *
  * ### Example
- * #### Example (DrupalEntity)
+ * #### Example (DrupalDrush)
  *     modules:
- *        - DrupalEntity:
- *          cleanup_test: true
- *          cleanup_failed: false
- *          cleanup_suite: true
- *          route_entities:
- *            - node
- *            - taxonomy_term.
+ *        - DrupalDrush:
+ *          working_directory: './web'
+ *          drush: './vendor/bin/drush'
+ *          alias: '@mysite.com'
+ *          options:
+ *            uri: http://mydomain.com
+ *            root: /app/web
  *
  * @package Codeception\Module
  */
-class DrupalEntity extends Module {
+class DrupalDrush extends Module {
 
   /**
    * Default module configuration.
    *
    * @var array
    */
-  protected array $config = [
-    'cleanup_test' => TRUE,
-    'cleanup_failed' => TRUE,
-    'cleanup_suite' => TRUE,
-    'route_entities' => [
-      'node',
-      'taxonomy_term',
-      'media',
-    ],
+  protected $config = [
+    'drush' => 'drush',
+    'alias' => '',
+    'options' => [],
   ];
 
   /**
-   * Entities to be deleted after test suite.
+   * Execute a drush command.
    *
-   * @var array
+   * @param string $command
+   *   Command to run.
+   *   e.g. "en devel -y".
+   * @param array $options
+   *   Associative array of options.
+   *
+   * @return string
+   *   The process output.
    */
-  protected $entities = [];
-
-  /**
-   * {@inheritdoc}
-   */
-  public function _afterSuite() { // @codingStandardsIgnoreLine
-    if ($this->config['cleanup_suite']) {
-      $this->doEntityCleanup();
+  public function runDrush($command, array $options = []) {
+    if ($alias = $this->_getConfig('alias')) {
+      $command = $alias . ' ' . $command;
     }
+    if (!empty($options)) {
+      $command = $this->normalizeOptions($options) . $command;
+    }
+    elseif ($this->_getConfig('options')) {
+      $command = $this->normalizeOptions($this->_getConfig('options')) . $command;
+    }
+    return Drush::runDrush($command, $this->_getConfig('drush'), $this->_getConfig('working_directory'));
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function _after(TestInterface $test) { // @codingStandardsIgnoreLine
-    if ($this->config['cleanup_test']) {
-      $this->doEntityCleanup();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function _failed(TestInterface $test, $fail) { // @codingStandardsIgnoreLine
-    if ($this->config['cleanup_failed']) {
-      $this->doEntityCleanup();
-    }
-  }
-
-  /**
-   * Create entity from values.
+   * Returns options as sting.
    *
-   * @param array $values
-   *   Data for creating entity.
-   * @param string $type
-   *   Entity type.
-   * @param bool $validate
-   *   Flag to validate entity fields..
+   * @param array $options
+   *   Associative array of options.
    *
-   * @return \Drupal\Core\Entity\EntityInterface|bool
-   *   Created entity.
+   * @return string
+   *    Sring of options.
    */
-  public function createEntity(array $values = [], string $type = 'node', bool $validate = TRUE) {
-    try {
-      $entity = \Drupal::entityTypeManager()
-        ->getStorage($type)
-        ->create($values);
-      if ($validate && $entity instanceof FieldableEntityInterface) {
-        $violations = $entity->validate();
-        if ($violations->count() > 0) {
-          $message = PHP_EOL;
-          foreach ($violations as $violation) {
-            $message .= $violation->getPropertyPath() . ': ' . $violation->getMessage() . PHP_EOL;
-          }
-          throw new \Exception($message);
-        }
-      }
-
-      $entity->save();
-    }
-    catch (\Exception $e) {
-      $this->fail('Could not create entity. Error message: ' . $e->getMessage());
-    }
-    if (!empty($entity)) {
-      $this->registerTestEntity($entity->getEntityTypeId(), $entity->id());
-
-      return $entity;
-    }
-
-    return FALSE;
-  }
-
-  /**
-   * Delete stored entities.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  public function doEntityCleanup() {
-    foreach ($this->entities as $type => $ids) {
-      $entities = \Drupal::entityTypeManager()
-        ->getStorage($type)
-        ->loadMultiple($ids);
-      foreach ($entities as $entity) {
-        $entity->delete();
+  protected function normalizeOptions(array $options) {
+    $command = '';
+    foreach ($options as $key => $value) {
+      if (is_string($value)) {
+        $command .= '--' . $key . '=' . $value . ' ';
       }
     }
+    return $command;
   }
 
   /**
-   * Register test entity to be deleted after tests.
+   * Gets login uri.
    *
-   * @param string $type
-   *   Entity type.
-   * @param string|int $id
-   *   Entity id.
+   * @param string $name
+   *   User id.
+   *
+   * @return bool|string
+   *   Login uri.
    */
-  public function registerTestEntity($type, $id) {
-    try {
-      \Drupal::entityTypeManager()->getStorage($type);
+  public function getLoginUri($name = '') {
+    $user = '';
+    if (!empty($name)) {
+      $user = '--name=' . $name;
     }
-    catch (\Exception $e) {
-      $this->fail('Invalid entity type specified: ' . $type);
-    }
-    $this->entities[$type][] = $id;
-  }
+    $gen_url = str_replace(PHP_EOL, '', $this->runDrush('uli ' . $user));
 
-  /**
-   * Gets entity form route.
-   *
-   * @param string $url
-   *   Uri.
-   *
-   * @return bool|\Drupal\Core\Entity\EntityInterface
-   *   Entity or FALSE.
-   */
-  public function getEntityFromUrl($url) {
-    $url = Url::fromUri("internal:" . $url);
-    if ($parameters = $url->getRouteParameters()) {
-      // Determine if the current route represents an entity.
-      foreach ($parameters as $name => $options) {
-        $entity = $url->getRouteParameters();
-        if (in_array($name, $this->_getConfig('route_entities'))) {
-          try {
-            $storage = \Drupal::entityTypeManager()->getStorage($name);
-            $entity = $storage->load($options);
-            if ($entity) {
-              return $entity;
-            }
-          }
-          catch (\Exception $e) {
-            continue;
-          }
-        }
-      }
-    }
-
-    return FALSE;
-  }
-
-  /**
-   * Register test entity by url.
-   *
-   * @param string $url
-   *   Url.
-   */
-  public function registerTestEntityByUrl($url) {
-    if ($entity = $this->getEntityFromUrl($url)) {
-      $this->registerTestEntity($entity->getEntityTypeId(), $entity->id());
-    }
+    return substr($gen_url, strpos($gen_url, '/user/reset'));
   }
 
 }
