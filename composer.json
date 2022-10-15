@@ -16,7 +16,7 @@
         "codeception/codeception": "^4.0",
         "codeception/visualception": "^1.0",
         "codeception/module-webdriver": "^2.0",
-        "captbaritone/mailcatcher-codeception-module": "^2.4"
+        "ericmartel/codeception-email-mailhog": "^1.0"
     },
     "require-dev": {
         "composer/installers": "^2.2",
