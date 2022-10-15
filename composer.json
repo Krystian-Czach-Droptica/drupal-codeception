@@ -12,7 +12,10 @@
         "codeception/codeception": ">=4.0",
         "fakerphp/faker": "^1.2",
         "codeception/module-webdriver": ">=2.4",
-        "webflo/drupal-finder": "^1.2"
+        "codeception/visualception": "^1.0",
+        "webflo/drupal-finder": "^1.2",
+        "phpunit/phpunit": "^9.5",
+		"vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
         "composer/installers": "^2.2",
