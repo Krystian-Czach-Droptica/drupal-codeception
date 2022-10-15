@@ -9,13 +9,14 @@
         }
     ],
     "require": {
-        "codeception/codeception": "^4.0",
         "fakerphp/faker": "^1.2",
-        "codeception/module-webdriver": "^2.0",
-        "codeception/visualception": "^1.0",
-        "webflo/drupal-finder": "^1.2",
         "phpunit/phpunit": "^9.5",
-	"vlucas/phpdotenv": "^5.4"
+        "vlucas/phpdotenv": "^5.4",
+        "webflo/drupal-finder": "^1.2",
+        "codeception/codeception": "^4.0",
+        "codeception/visualception": "^1.0",
+        "codeception/module-webdriver": "^2.0",
+        "captbaritone/mailcatcher-codeception-module": "^2.4"
     },
     "require-dev": {
         "composer/installers": "^2.2",
