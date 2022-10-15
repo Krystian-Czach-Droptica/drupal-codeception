@@ -67,7 +67,6 @@ class DrupalUser extends Module {
    * {@inheritdoc}
    */
   public function _beforeSuite($settings = []) { // @codingStandardsIgnoreLine
-    $this->driver = null;
     if (!$this->hasModule($this->_getConfig('driver'))) {
       $this->fail('User driver module not found.');
     }
