@@ -3,6 +3,7 @@
 namespace Codeception\Module;
 
 use Codeception\Module;
+use Codeception\TestInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Url;
 use Codeception\TestCase;
@@ -30,7 +31,7 @@ class DrupalEntity extends Module {
    *
    * @var array
    */
-  protected $config = [
+  protected array $config = [
     'cleanup_test' => TRUE,
     'cleanup_failed' => TRUE,
     'cleanup_suite' => TRUE,
@@ -60,7 +61,7 @@ class DrupalEntity extends Module {
   /**
    * {@inheritdoc}
    */
-  public function _after(TestCase $test) { // @codingStandardsIgnoreLine
+  public function _after(TestInterface $test) { // @codingStandardsIgnoreLine
     if ($this->config['cleanup_test']) {
       $this->doEntityCleanup();
     }
@@ -69,7 +70,7 @@ class DrupalEntity extends Module {
   /**
    * {@inheritdoc}
    */
-  public function _failed(TestCase $test, $fail) { // @codingStandardsIgnoreLine
+  public function _failed(TestInterface $test, $fail) { // @codingStandardsIgnoreLine
     if ($this->config['cleanup_failed']) {
       $this->doEntityCleanup();
     }
@@ -88,7 +89,7 @@ class DrupalEntity extends Module {
    * @return \Drupal\Core\Entity\EntityInterface|bool
    *   Created entity.
    */
-  public function createEntity(array $values = [], $type = 'node', $validate = TRUE) {
+  public function createEntity(array $values = [], string $type = 'node', bool $validate = TRUE) {
     try {
       $entity = \Drupal::entityTypeManager()
         ->getStorage($type)

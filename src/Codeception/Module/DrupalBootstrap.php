@@ -30,7 +30,7 @@ class DrupalBootstrap extends Module {
    *
    * @var array
    */
-  protected $config = [
+  protected array $config = [
     'site_path' => 'sites/default',
   ];
 
@@ -45,7 +45,7 @@ class DrupalBootstrap extends Module {
    * @throws \Codeception\Exception\ModuleConfigException
    * @throws \Codeception\Exception\ModuleException
    */
-  public function __construct(ModuleContainer $container, $config = NULL) {
+  public function __construct(ModuleContainer $container, array $config = NULL) {
     parent::__construct($container, $config);
     if (!isset($this->config['root'])) {
 
@@ -66,10 +66,10 @@ class DrupalBootstrap extends Module {
     if (isset($this->config['http_host'])) {
       $_SERVER['HTTP_HOST'] = $this->config['http_host'];
     }
-    $request = Request::createFromGlobals();
-    $autoloader = require $this->_getConfig('root') . '/autoload.php';
-    $kernel = new TestDrupalKernel('prod', $autoloader, $this->_getConfig('root'));
-    $kernel->bootTestEnvironment($this->_getConfig('site_path'), $request);
+//    $request = Request::createFromGlobals();
+//    $autoloader = require $this->_getConfig('root') . '/autoload.php';
+//    $kernel = new TestDrupalKernel('prod', $autoloader, $this->_getConfig('root'));
+//    $kernel->bootTestEnvironment($this->_getConfig('site_path'), $request);
   }
 
 }
