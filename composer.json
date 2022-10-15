@@ -9,9 +9,9 @@
         }
     ],
     "require": {
-        "codeception/codeception": ">=5.0",
+        "codeception/codeception": ">=4.0",
         "fakerphp/faker": "^1.2",
-        "codeception/module-webdriver": ">=3.1",
+        "codeception/module-webdriver": ">=2.4",
         "webflo/drupal-finder": "^1.2"
     },
     "require-dev": {
